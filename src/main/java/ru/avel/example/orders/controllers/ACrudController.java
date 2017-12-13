@@ -7,6 +7,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.repository.CrudRepository;
@@ -52,41 +54,41 @@ public abstract class ACrudController<T, ID extends Serializable> {
 
 	
 	@GetMapping
-	public Iterable<T> list() {
-		logger.debug("LIST");
+	public Iterable<T> list(HttpServletRequest req) {
+		printRequest(req, "LIST");
 		return repository.findAll();
 	}
 
 	@GetMapping("/{id}")
-	public T read( @PathVariable ID id ) {
+	public T read( @PathVariable ID id, HttpServletRequest req ) {
 		T obj = repository.findOne( id );
-		logger.debug("READ: " + obj.toString());
+		printRequest(req, "READ: " + obj.toString());
 		return obj;
 	}
 
 	@RequestMapping(method = {RequestMethod.POST, RequestMethod.PUT}, consumes = "application/json")
-	public T create( @RequestBody T obj ) {
-		logger.debug("CREATE: " + obj.toString());
+	public T create( @RequestBody T obj, HttpServletRequest req ) {
 		obj = repository.save( obj );
+		printRequest(req, "CREATE: " + obj.toString());
 		return obj;
 	}
 
 	@RequestMapping(path="/{id}", method = {RequestMethod.POST, RequestMethod.PUT}, consumes = "application/json")
-	public T update( @PathVariable ID id, @RequestBody(required = false) T obj ) {
-		if ( obj == null ) obj = delete( id );
+	public T update( @PathVariable ID id, @RequestBody(required = false) T obj, HttpServletRequest req ) {
+		if ( obj == null ) obj = delete( id, req );
 		else {
-			logger.debug("UPDATE: " + obj.toString());
 			obj = repository.save( obj );
+			printRequest(req, "UPDATE: " + obj.toString());
 		}
 		return obj;
 	}
 	
 	@DeleteMapping(path="/{id}")
-	public T delete( @PathVariable ID id ) {
-		T obj = read( id );
+	public T delete( @PathVariable ID id, HttpServletRequest req ) {
+		T obj = read( id, null );
 		if (obj != null) {
-			logger.debug("DELETE: " + obj.toString());
 			repository.delete( id );
+			printRequest(req, "DELETE: " + obj.toString());
 		}
 		return obj;
 	}
@@ -96,6 +98,14 @@ public abstract class ACrudController<T, ID extends Serializable> {
 	 *	Utils
 	 */
 	
+	private void printRequest( HttpServletRequest req, String value ) {
+		if (req == null) return;
+		String uri = req.getMethod() + " " + req.getRequestURI();
+		logger.debug(uri);
+		logger.debug(value);
+		System.out.println(uri);
+		System.out.println(value);
+	}
 	
 	public void setParams( T obj, Map<String, String> params ) {
 		for (Field f : classEntity.getDeclaredFields()) {
