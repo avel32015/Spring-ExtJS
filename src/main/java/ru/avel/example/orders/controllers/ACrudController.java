@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public abstract class ACrudController<T, ID extends Serializable> {
 	
 	protected final Logger logger = LoggerFactory.getLogger( this.getClass() );
@@ -55,8 +58,15 @@ public abstract class ACrudController<T, ID extends Serializable> {
 	
 	@GetMapping
 	public Iterable<T> list(HttpServletRequest req) {
-		printRequest(req, "LIST");
-		return repository.findAll();
+		Iterable<T> list = repository.findAll();
+		String value = null;
+		try {
+			value = new ObjectMapper().writeValueAsString(list);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		printRequest(req, "LIST: " + value);		
+		return list;
 	}
 
 	@GetMapping("/{id}")
@@ -101,8 +111,8 @@ public abstract class ACrudController<T, ID extends Serializable> {
 	private void printRequest( HttpServletRequest req, String value ) {
 		if (req == null) return;
 		String uri = req.getMethod() + " " + req.getRequestURI();
-		logger.debug(uri);
-		logger.debug(value);
+		//logger.info(uri);
+		//logger.info(value);
 		System.out.println(uri);
 		System.out.println(value);
 	}
