@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss} %-5p %c{1} %m%n</pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="file" class="ch.qos.logback.core.FileAppender">
+		<file>logs/orders.log</file>
+		<encoder>
+			<pattern>%d{HH:mm:ss} %-5p [%c] %m%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="org.springframework.jndi" level="info" />
+	<logger name="org.springframework.beans" level="info" />
+	<logger name="org.springframework.core" level="info" />
+	<logger name="org.springframework.context" level="info" />
+	<logger name="org.springframework.http" level="info" />
+	<logger name="org.springframework.web" level="info" />
+	<logger name="org.springframework.web.servlet" level="debug" />
+	<logger name="org.hibernate.SQL" level="debug" />
+	<logger name="org.hibernate.type" level="trace" />
+	
+	<logger name="ru.avel.example.orders" level="debug" />
+
+	<root level="info">
+		<!-- <appender-ref ref="console" />  -->
+		<appender-ref ref="file" />
+	</root>
+	
+</configuration>
